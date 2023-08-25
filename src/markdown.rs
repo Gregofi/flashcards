@@ -1,5 +1,4 @@
 use std::io::{BufRead, Result};
-use crate::serialize::Serialize;
 use crate::flashcard::Flashcard;
 
 fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<Flashcard>> {
