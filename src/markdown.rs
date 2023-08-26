@@ -1,5 +1,5 @@
 use std::io::{BufRead, Result};
-use crate::flashcard::Flashcard;
+use crate::models::Flashcard;
 
 fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<Flashcard>> {
     let mut flashcards: Vec<Flashcard> = vec![];
