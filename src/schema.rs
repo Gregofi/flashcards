@@ -2,7 +2,7 @@
 
 diesel::table! {
     Answer (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         flashcard_id -> Integer,
         timestamp -> Timestamp,
         answer_rating -> Integer,
@@ -11,7 +11,7 @@ diesel::table! {
 
 diesel::table! {
     Flashcard (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         question -> Text,
         answer -> Text,
     }

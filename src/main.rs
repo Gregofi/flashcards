@@ -60,7 +60,7 @@ fn main() -> Result<()> {
 
     match matches.subcommand() {
         Some(("markdown", md_matches)) => {
-            let mut cards_vec: Vec<Flashcard> = vec![];
+            let mut cards_vec = vec![];
             let folder: &String = md_matches.get_one("folder").expect("path is required");
             info!("inspecting folder {}", folder);
             for entry in WalkDir::new(folder)
