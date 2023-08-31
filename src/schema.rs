@@ -19,7 +19,4 @@ diesel::table! {
 
 diesel::joinable!(Answer -> Flashcard (flashcard_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    Answer,
-    Flashcard,
-);
+diesel::allow_tables_to_appear_in_same_query!(Answer, Flashcard,);

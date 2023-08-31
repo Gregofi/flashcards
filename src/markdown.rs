@@ -1,7 +1,7 @@
-use std::io::{BufRead, Result};
 use crate::models::Flashcard;
+use std::io::{BufRead, Result};
 
-fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<Flashcard>> {
+pub fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<Flashcard>> {
     let mut flashcards: Vec<Flashcard> = vec![];
     let mut line_it = reader.lines();
     loop {
@@ -18,7 +18,7 @@ fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<Flashcard>> {
         let question = it.next().unwrap().trim().to_string();
         let tags: Vec<String> = it.map(|s| s.to_string()).collect();
         if !tags.into_iter().any(|s| s.starts_with("flashcard")) {
-            continue; 
+            continue;
         }
         let answer = line_it.try_fold(String::from(""), |mut acc, line| {
             let line = line.unwrap();
@@ -32,7 +32,9 @@ fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<Flashcard>> {
         let answer = match answer {
             Ok(_) => break,
             Err(answer) => answer,
-        }.trim().to_string();
+        }
+        .trim()
+        .to_string();
         flashcards.push(Flashcard { question, answer });
     }
     Ok(flashcards)
