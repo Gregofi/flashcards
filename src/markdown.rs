@@ -1,7 +1,7 @@
 use crate::models::NewFlashcard;
 use std::io::{BufRead, Result};
 
-pub fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<NewFlashcard>> {
+pub async fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<NewFlashcard>> {
     let mut flashcards = vec![];
     let mut line_it = reader.lines();
     loop {
@@ -10,10 +10,12 @@ pub fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<NewFlashcard>> {
             break;
         }
         let line = line.unwrap()?;
-        // Try to parse the format
+        // Try to parse the format:
+        // ```
         // question text ... [#tags ...] #flashcard [#tags ...]
         // answer text (possibly over multiple lines)
         // ---
+        // ```
         let mut it = line.split('#');
         let question = it.next().unwrap().trim().to_string();
         let tags: Vec<String> = it.map(|s| s.to_string()).collect();
@@ -22,6 +24,7 @@ pub fn read_markdown<R: BufRead>(reader: R) -> Result<Vec<NewFlashcard>> {
         }
         let answer = line_it.try_fold(String::from(""), |mut acc, line| {
             let line = line.unwrap();
+            // TODO: Use some generic pattern to match a markdown "line"
             if !line.starts_with("---") && !line.starts_with("- - -") {
                 acc.push_str(line.as_str());
                 Ok(acc)
@@ -45,29 +48,29 @@ mod tests {
     use super::*;
     use std::io::Cursor;
 
-    #[test]
-    fn test_read_empty_markdown() {
+    #[tokio::test]
+    async fn test_read_empty_markdown() {
         let markdown = "";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).unwrap();
+        let flashcards = read_markdown(reader).await.unwrap();
         assert_eq!(flashcards.len(), 0);
     }
 
-    #[test]
-    fn test_read_markdown_one_question() {
+    #[tokio::test]
+    async fn test_read_markdown_one_question() {
         let markdown = "question #flashcard\nanswer\n---\n";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).unwrap();
+        let flashcards = read_markdown(reader).await.unwrap();
         assert_eq!(flashcards.len(), 1);
         assert_eq!(flashcards[0].question, "question");
         assert_eq!(flashcards[0].answer, "answer");
     }
 
-    #[test]
-    fn test_multiple_questions() {
+    #[tokio::test]
+    async fn test_multiple_questions() {
         let markdown = "question #flashcard\nanswer\n---\nquestion2 #flashcard\nanswer2\n---\n";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).unwrap();
+        let flashcards = read_markdown(reader).await.unwrap();
         assert_eq!(flashcards.len(), 2);
         assert_eq!(flashcards[0].question, "question");
         assert_eq!(flashcards[0].answer, "answer");
@@ -75,11 +78,11 @@ mod tests {
         assert_eq!(flashcards[1].answer, "answer2");
     }
 
-    #[test]
-    fn test_mix_questions_text() {
+    #[tokio::test]
+    async fn test_mix_questions_text() {
         let markdown = "question #flashcard\nanswer\n---\nSome random text\nquestion2 #flashcard\nanswer2\n---\nMore random text\nquestion3 #flashcard\nanswer3\n---\n";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).unwrap();
+        let flashcards = read_markdown(reader).await.unwrap();
         assert_eq!(flashcards.len(), 3);
         assert_eq!(flashcards[0].question, "question");
         assert_eq!(flashcards[0].answer, "answer");
@@ -89,19 +92,19 @@ mod tests {
         assert_eq!(flashcards[2].answer, "answer3");
     }
 
-    #[test]
-    fn test_no_questions() {
+    #[tokio::test]
+    async fn test_no_questions() {
         let markdown = "Some random text\nSome more random text\n";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).unwrap();
+        let flashcards = read_markdown(reader).await.unwrap();
         assert_eq!(flashcards.len(), 0);
     }
 
-    #[test]
-    fn test_unterminated_question() {
+    #[tokio::test]
+    async fn test_unterminated_question() {
         let markdown = "question #flashcard\nanswer\n";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).unwrap();
+        let flashcards = read_markdown(reader).await.unwrap();
         assert_eq!(flashcards.len(), 0);
     }
 }

@@ -13,11 +13,12 @@ use std::io::Result;
 mod markdown;
 mod models;
 mod schema;
+mod spa;
 mod sync;
 
 use crate::models::Flashcard;
 
-pub fn estabilish_connection() -> SqliteConnection {
+pub async fn estabilish_connection() -> SqliteConnection {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -35,10 +36,11 @@ struct Args {
     count: u8,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     env_logger::init();
 
-    let db = &mut estabilish_connection();
+    let db = &mut estabilish_connection().await;
 
     let matches = Command::new("flashy")
         .about("Flashcard application")
@@ -74,7 +76,7 @@ fn main() -> Result<()> {
                     let path = entry.path();
                     let file = File::open(path)?;
                     let reader = BufReader::new(file);
-                    let cards = markdown::read_markdown(reader)?;
+                    let cards = markdown::read_markdown(reader).await?;
                     cards_vec.extend(cards);
                 } else {
                     debug!("skipping file {}", fname);
