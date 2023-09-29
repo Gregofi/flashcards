@@ -1,7 +1,7 @@
 use crate::debug;
 use crate::models::Flashcard;
 use crate::spa::{NaiveExponentialSPA, SPA};
-use crate::{session::Session};
+use crate::session::Session;
 use crossterm::{
     event::{self, Event, KeyCode},
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -43,7 +43,7 @@ impl App {
         }
     }
 
-    fn run<B: Backend>(&mut self, terminal: &mut Terminal<B>) -> io::Result<()> {
+    async fn run<B: Backend>(&mut self, terminal: &mut Terminal<B>) -> io::Result<()> {
         let spa = NaiveExponentialSPA::new(50, 128);
 
         loop {
@@ -59,16 +59,18 @@ impl App {
                                 .db
                                 .borrow_mut()
                                 .get_cards()
+                                .await
                                 .unwrap()
                                 .into_iter()
                                 .collect();
-                            let to_review_cards = cards
-                                .into_iter()
-                                .filter(|c| {
-                                    let answers = self.db.borrow_mut().get_answers(c).unwrap();
-                                    spa.repeat_question(&answers)
-                                })
-                                .collect();
+                            let mut to_review_cards = vec![];
+                            // TODO: filter requires async closure and it can get weird.
+                            for card in cards {
+                                let answers = self.db.borrow_mut().get_answers(&card).await.unwrap();
+                                if spa.repeat_question(&answers) {
+                                    to_review_cards.push(card);
+                                }
+                            }
                             let session = Session::new(to_review_cards);
                             self.session = Some(session);
                             self.current_screen = CurrentScreen::FlashcardsReview(Review::Question);
@@ -109,6 +111,7 @@ impl App {
                                 self.db
                                     .borrow_mut()
                                     .persist_answer(answer)
+                                    .await
                                     .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
                                 session.advance_questions();
                                 self.current_screen =
@@ -125,13 +128,7 @@ impl App {
     fn ui<B: Backend>(&mut self, frame: &mut Frame<B>) {
         match &mut self.current_screen {
             CurrentScreen::Index => {
-                let cards = self.db.borrow_mut().get_cards();
-                let card_info = match cards {
-                    Ok(cards) => format!("{} cards loaded", cards.len()),
-                    Err(err) => format!("No cards loaded {}", err),
-                };
                 let text = Text::from(vec![
-                    Line::from(card_info),
                     Line::from(Span::styled(
                         "Menu",
                         Style::default().bold().fg(Color::Gray),
@@ -181,13 +178,13 @@ impl App {
     }
 }
 
-pub fn tui(db: Db) -> io::Result<()> {
+pub async fn tui(db: Db) -> io::Result<()> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     let mut app = App::new(db);
 
-    app.run(&mut terminal)?;
+    app.run(&mut terminal).await?;
 
     disable_raw_mode()?;
     stdout().execute(LeaveAlternateScreen)?;

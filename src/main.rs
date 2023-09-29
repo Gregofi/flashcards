@@ -1,9 +1,9 @@
 use clap::{Command, Parser};
-use diesel::prelude::*;
-use diesel::sqlite::SqliteConnection;
 use dotenvy::dotenv;
 use log::{debug, info};
 use walkdir::WalkDir;
+use sqlx::sqlite::SqliteConnection;
+use sqlx::Connection;
 
 use std::env;
 use std::fs::File;
@@ -16,18 +16,16 @@ use crate::tui::tui;
 mod db;
 mod markdown;
 mod models;
-mod schema;
 mod session;
 mod spa;
 mod sync;
 mod tui;
 
-pub async fn estabilish_connection() -> SqliteConnection {
+pub async fn estabilish_connection() -> sqlx::Result<sqlx::SqliteConnection> {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    SqliteConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+    SqliteConnection::connect(&database_url).await
 }
 
 #[derive(Parser, Debug)]
@@ -44,7 +42,7 @@ struct Args {
 async fn main() -> Result<()> {
     env_logger::init();
 
-    let _db = estabilish_connection().await;
+    let _db = estabilish_connection().await.unwrap();
     let mut db = db::Db::new(_db);
 
     let matches = Command::new("flashy")
@@ -94,6 +92,7 @@ async fn main() -> Result<()> {
             });
             let cards: Vec<Flashcard> = db
                 .get_cards()
+                .await
                 .unwrap()
                 .into_iter()
                 .collect();
@@ -101,17 +100,17 @@ async fn main() -> Result<()> {
             for card in synced {
                 match card {
                     sync::CardType::New(c) => {
-                        db.add_card(c).unwrap();
+                        db.add_card(c).await.unwrap();
                     }
                     sync::CardType::Old(c) => {
-                        db.update_card(&c).unwrap();
+                        db.update_card(&c).await.unwrap();
                     }
                 }
             }
         }
         Some(_) => unreachable!(),
         None => {
-            tui(db)?;
+            tui(db).await.unwrap();
         }
     }
 
