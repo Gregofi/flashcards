@@ -1,18 +1,20 @@
+use log::debug;
+
 use crate::models::Answer;
 
-trait SPA {
+pub trait SPA {
     /// Returns true if the question should be offered, otherwise
     /// returns false.
     /// The answers must be sorted by timestamp, with the most recent
     /// answer being the last one.
-    fn repeat_question(&self, answers: &Vec<Answer>) -> bool;
+    fn repeat_question(&self, answers: &[Answer]) -> bool;
 }
 
 /// A naive exponential spaced repetition algorithm.
 /// The questions are repeated after 2^N days, where N is the number of
 /// consequent good questions. It does not take into account the
 /// previous results, only the last N consequent good answers.
-struct NaiveExponentialSPA {
+pub struct NaiveExponentialSPA {
     minimum_rating: i32,
     /// A maximum day limit which overrides the normal exponential procedure.
     /// If the number of days between the last answer and now is greater than
@@ -21,13 +23,20 @@ struct NaiveExponentialSPA {
 }
 
 impl NaiveExponentialSPA {
+    pub fn new(minimum_rating: i32, limit: i32) -> Self {
+        Self {
+            minimum_rating,
+            limit,
+        }
+    }
+
     fn is_correct(&self, answer: &Answer) -> bool {
         answer.answer_rating >= self.minimum_rating
     }
 }
 
 impl SPA for NaiveExponentialSPA {
-    fn repeat_question(&self, answers: &Vec<Answer>) -> bool {
+    fn repeat_question(&self, answers: &[Answer]) -> bool {
         match answers.len() {
             0 => true,
             len => {
@@ -36,7 +45,7 @@ impl SPA for NaiveExponentialSPA {
                 } else {
                     // Find the last incorrect answer => all following answers are correct
                     let good_questions =
-                        match answers.into_iter().rev().position(|a| !self.is_correct(a)) {
+                        match answers.iter().rev().position(|a| !self.is_correct(a)) {
                             Some(idx) => idx,
                             None => len,
                         };
@@ -49,7 +58,7 @@ impl SPA for NaiveExponentialSPA {
                     let days_between = now
                         .signed_duration_since(answers.last().unwrap().timestamp)
                         .num_days();
-                    println!("days_between > day_limit: {} > {}", days_between, day_limit);
+                    debug!("days_between > day_limit: {} > {}", days_between, day_limit);
                     days_between >= day_limit as i64
                 }
             }

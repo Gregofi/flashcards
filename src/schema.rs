@@ -1,6 +1,7 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    #[allow(non_snake_case)]
     Answer (id) {
         id -> Integer,
         flashcard_id -> Integer,
@@ -10,6 +11,7 @@ diesel::table! {
 }
 
 diesel::table! {
+    #[allow(non_snake_case)]
     Flashcard (id) {
         id -> Integer,
         question -> Text,

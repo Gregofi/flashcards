@@ -2,7 +2,7 @@ use clap::{Command, Parser};
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
 use dotenvy::dotenv;
-use log::{debug, error, info, warn};
+use log::{debug, info};
 use walkdir::WalkDir;
 
 use std::env;
@@ -10,13 +10,17 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::Result;
 
+use crate::models::Flashcard;
+use crate::tui::tui;
+
+mod db;
 mod markdown;
 mod models;
 mod schema;
+mod session;
 mod spa;
 mod sync;
-
-use crate::models::Flashcard;
+mod tui;
 
 pub async fn estabilish_connection() -> SqliteConnection {
     dotenv().ok();
@@ -40,7 +44,8 @@ struct Args {
 async fn main() -> Result<()> {
     env_logger::init();
 
-    let db = &mut estabilish_connection().await;
+    let _db = estabilish_connection().await;
+    let mut db = db::Db::new(_db);
 
     let matches = Command::new("flashy")
         .about("Flashcard application")
@@ -87,9 +92,27 @@ async fn main() -> Result<()> {
                 info!("question: {}", card.question);
                 info!("answer: {}", card.answer);
             });
+            let cards: Vec<Flashcard> = db
+                .get_cards()
+                .unwrap()
+                .into_iter()
+                .collect();
+            let synced = sync::sync(&cards, cards_vec).await;
+            for card in synced {
+                match card {
+                    sync::CardType::New(c) => {
+                        db.add_card(c).unwrap();
+                    }
+                    sync::CardType::Old(c) => {
+                        db.update_card(&c).unwrap();
+                    }
+                }
+            }
         }
         Some(_) => unreachable!(),
-        None => todo!(),
+        None => {
+            tui(db)?;
+        }
     }
 
     Ok(())

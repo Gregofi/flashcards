@@ -12,7 +12,7 @@ pub enum CardType {
 /// the same card and the old card with its ID is returned. Otherwise, it is
 /// returned as a new card without any ID.
 pub async fn sync(
-    old_flashcards: &Vec<Flashcard>,
+    old_flashcards: &[Flashcard],
     new_flashcards: Vec<NewFlashcard>,
 ) -> Vec<CardType> {
     // This function has O(n^2 * string_distance_computation) complexity, which
