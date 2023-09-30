@@ -5,11 +5,9 @@
 
 use dotenvy::dotenv;
 use models::flashcard::Flashcard;
-use sqlx::sqlite::{SqliteConnection, SqlitePoolOptions};
-use sqlx::{Connection, SqlitePool};
-use std::cell::RefCell;
+use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::SqlitePool;
 use std::env;
-use std::sync::Arc;
 
 mod models;
 mod parsers;
@@ -78,6 +76,28 @@ async fn answer_question(flashcard_id: i32, answer_rating: i32, state: tauri::St
     Ok(())
 }
 
+#[tauri::command]
+async fn sync_flashcards(folder: String, state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let new_cards = parsers::parser::parse_folder(&folder).await
+        .map_err(|e| e.to_string())?;
+    let old_cards = state.db.get_cards().await
+        .map_err(|e| e.to_string())?;
+    let synced_cards = sync::sync(&old_cards, new_cards).await;
+    for card in synced_cards {
+        match card {
+            sync::CardType::New(card) => {
+                state.db.add_card(card).await
+                    .map_err(|e| e.to_string())?;
+            }
+            sync::CardType::Old(card) => {
+                state.db.update_card(&card).await
+                    .map_err(|e| e.to_string())?;
+            }
+        }
+    }
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     env_logger::init();
@@ -85,9 +105,9 @@ async fn main() {
     let db = Db::new(pool);
     let state = AppState { db };
     tauri::Builder::default()
-        .setup(|app| {Ok(())})
+        .setup(|_| {Ok(())})
         .manage(state)
-        .invoke_handler(tauri::generate_handler![get_all_cards, get_cards_to_review, answer_question])
+        .invoke_handler(tauri::generate_handler![get_all_cards, get_cards_to_review, answer_question, sync_flashcards])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

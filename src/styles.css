@@ -19,6 +19,15 @@
     padding-top: 10vh;
     display: flex;
     flex-direction: column;
+    text-align: center;
+    height: -webkit-fill-available;
+}
+
+.review-container {
+    margin: 0;
+    padding-top: 10vh;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
     text-align: center;
     height: -webkit-fill-available;

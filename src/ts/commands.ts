@@ -10,3 +10,5 @@ export const getCardsToReview = async () => invoke("get_cards_to_review") as Pro
 
 export const saveAnswer = async (flashcardId: number, answerRating: number) =>
   invoke("answer_question", { flashcardId, answerRating });
+
+export const syncFolder = async (folder: string) => invoke("sync_flashcards", { folder });

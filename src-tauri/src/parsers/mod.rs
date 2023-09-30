@@ -1,1 +1,2 @@
-mod markdown;
+pub mod markdown;
+pub mod parser;
