@@ -1,20 +1,13 @@
 use log::debug;
 
-use crate::models::Answer;
-
-pub trait SPA {
-    /// Returns true if the question should be offered, otherwise
-    /// returns false.
-    /// The answers must be sorted by timestamp, with the most recent
-    /// answer being the last one.
-    fn repeat_question(&self, answers: &[Answer]) -> bool;
-}
+use crate::models::answer::Answer;
+use crate::repetition_algs::RepetitionAlgorithm;
 
 /// A naive exponential spaced repetition algorithm.
 /// The questions are repeated after 2^N days, where N is the number of
 /// consequent good questions. It does not take into account the
 /// previous results, only the last N consequent good answers.
-pub struct NaiveExponentialSPA {
+pub struct NaiveExponentialRA {
     minimum_rating: i32,
     /// A maximum day limit which overrides the normal exponential procedure.
     /// If the number of days between the last answer and now is greater than
@@ -22,7 +15,7 @@ pub struct NaiveExponentialSPA {
     limit: i32,
 }
 
-impl NaiveExponentialSPA {
+impl NaiveExponentialRA {
     pub fn new(minimum_rating: i32, limit: i32) -> Self {
         Self {
             minimum_rating,
@@ -35,7 +28,7 @@ impl NaiveExponentialSPA {
     }
 }
 
-impl SPA for NaiveExponentialSPA {
+impl RepetitionAlgorithm for NaiveExponentialRA {
     fn repeat_question(&self, answers: &[Answer]) -> bool {
         match answers.len() {
             0 => true,
@@ -76,13 +69,13 @@ mod tests {
     #[test]
     fn last_incorrect() {
         // Last incorrect always leads to repetition.
-        let spa = NaiveExponentialSPA {
+        let spa = NaiveExponentialRA {
             minimum_rating: 50,
             limit: 128,
         };
         let answers = vec![
             Answer {
-                id: 1,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -91,7 +84,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 2,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -100,7 +93,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 3,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: WRONG,
                 timestamp: chrono::Utc::now()
@@ -114,12 +107,12 @@ mod tests {
 
     #[test]
     fn repeat_one() {
-        let spa = NaiveExponentialSPA {
+        let spa = NaiveExponentialRA {
             minimum_rating: 50,
             limit: 128,
         };
         let answers = vec![Answer {
-            id: 1,
+            id: None,
             flashcard_id: 1,
             answer_rating: RIGHT,
             timestamp: chrono::Utc::now()
@@ -132,13 +125,13 @@ mod tests {
 
     #[test]
     fn repeat_question() {
-        let spa = NaiveExponentialSPA {
+        let spa = NaiveExponentialRA {
             minimum_rating: 50,
             limit: 128,
         };
         let answers = vec![
             Answer {
-                id: 1,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -147,7 +140,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 2,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -156,7 +149,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 3,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -170,13 +163,13 @@ mod tests {
 
     #[test]
     fn dont_repeat_question() {
-        let spa = NaiveExponentialSPA {
+        let spa = NaiveExponentialRA {
             minimum_rating: 50,
             limit: 128,
         };
         let answers = vec![
             Answer {
-                id: 1,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -185,7 +178,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 2,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -194,7 +187,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 3,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -208,13 +201,13 @@ mod tests {
 
     #[test]
     fn last_over_limit() {
-        let spa = NaiveExponentialSPA {
+        let spa = NaiveExponentialRA {
             minimum_rating: 50,
             limit: 8,
         };
         let answers = vec![
             Answer {
-                id: 1,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -223,7 +216,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 2,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -232,7 +225,7 @@ mod tests {
                     .unwrap(),
             },
             Answer {
-                id: 3,
+                id: None,
                 flashcard_id: 1,
                 answer_rating: RIGHT,
                 timestamp: chrono::Utc::now()
@@ -246,7 +239,7 @@ mod tests {
 
     #[test]
     fn no_questions() {
-        let spa = NaiveExponentialSPA {
+        let spa = NaiveExponentialRA {
             minimum_rating: 50,
             limit: 128,
         };

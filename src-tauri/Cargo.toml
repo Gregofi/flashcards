@@ -1,0 +1,33 @@
+[package]
+name = "flashcards"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.4", features = [] }
+
+[dependencies]
+tauri = { version = "1.4", features = ["shell-open"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dotenvy = "0.15"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4.4.2", features = ["derive"] }
+walkdir = "2.3.3"
+log = "0.4.20"
+env_logger = "0.10.0"
+strsim = "0.10.0"
+tokio = { version = "1.32.0", features = ["full"] }
+anyhow = "1.0.75"
+sqlx = { version = "0.7.2", features = ["runtime-tokio", "sqlite", "chrono"] }
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]

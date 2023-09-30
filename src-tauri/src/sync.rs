@@ -1,9 +1,9 @@
-use crate::models::{Flashcard, NewFlashcard};
+use crate::models::prelude::Flashcard;
 use strsim::levenshtein;
 
 #[derive(Debug, PartialEq)]
 pub enum CardType {
-    New(NewFlashcard),
+    New(Flashcard),
     Old(Flashcard),
 }
 
@@ -13,7 +13,7 @@ pub enum CardType {
 /// returned as a new card without any ID.
 pub async fn sync(
     old_flashcards: &[Flashcard],
-    new_flashcards: Vec<NewFlashcard>,
+    new_flashcards: Vec<Flashcard>,
 ) -> Vec<CardType> {
     // This function has O(n^2 * string_distance_computation) complexity, which
     // can be devastating. We could and should do something about it, first
@@ -56,11 +56,12 @@ mod tests {
     #[tokio::test]
     async fn no_sync() {
         let old = vec![Flashcard {
-            id: 1,
+            id: None,
             question: "q1".to_string(),
             answer: "a1".to_string(),
         }];
-        let new = vec![NewFlashcard {
+        let new = vec![Flashcard {
+            id: None,
             question: "q1".to_string(),
             answer: "a1".to_string(),
         }];
@@ -69,7 +70,7 @@ mod tests {
         assert_eq!(
             synced[0],
             CardType::Old(Flashcard {
-                id: 1,
+                id: None,
                 question: "q1".to_string(),
                 answer: "a1".to_string(),
             })
@@ -79,11 +80,12 @@ mod tests {
     #[tokio::test]
     async fn sync_one() {
         let old = vec![Flashcard {
-            id: 1,
+            id: None,
             question: "a very loong text that has one typo in it".to_string(),
             answer: "a1".to_string(),
         }];
-        let new = vec![NewFlashcard {
+        let new = vec![Flashcard {
+            id: None,
             question: "a very long text that has one typo in it".to_string(),
             answer: "a1".to_string(),
         }];
@@ -92,7 +94,7 @@ mod tests {
         assert_eq!(
             synced[0],
             CardType::Old(Flashcard {
-                id: 1,
+                id: None,
                 question: "a very long text that has one typo in it".to_string(),
                 answer: "a1".to_string(),
             })
@@ -102,11 +104,12 @@ mod tests {
     #[tokio::test]
     async fn add_and_remove() {
         let old = vec![Flashcard {
-            id: 1,
+            id: None,
             question: "a flashcard".to_string(),
             answer: "a1".to_string(),
         }];
-        let new = vec![NewFlashcard {
+        let new = vec![Flashcard {
+            id: None,
             question: "arghargh".to_string(),
             answer: "a2".to_string(),
         }];
@@ -114,7 +117,8 @@ mod tests {
         assert_eq!(synced.len(), 1);
         assert_eq!(
             synced[0],
-            CardType::New(NewFlashcard {
+            CardType::New(Flashcard {
+                id: None,
                 question: "arghargh".to_string(),
                 answer: "a2".to_string(),
             })
@@ -125,27 +129,30 @@ mod tests {
     async fn sync_multiple() {
         let old = vec![
             Flashcard {
-                id: 1,
+                id: None,
                 question: "text of question 1 is very interesting".to_string(),
                 answer: "a1".to_string(),
             },
             Flashcard {
-                id: 2,
+                id: None,
                 question: "text of question 2 is a bore to be honest".to_string(),
                 answer: "a2".to_string(),
             },
         ];
         let new = vec![
-            NewFlashcard {
+            Flashcard {
+                id: None,
                 question: "A new flashcard! What a day.".to_string(),
                 answer: "a1".to_string(),
             },
             // Sync this one
-            NewFlashcard {
+            Flashcard {
+                id: None,
                 question: "text of question 2 is a bore to be honest.".to_string(),
                 answer: "a2".to_string(),
             },
-            NewFlashcard {
+            Flashcard {
+                id: None,
                 question: "Some fascinating text".to_string(),
                 answer: "a3".to_string(),
             },
@@ -154,7 +161,8 @@ mod tests {
         assert_eq!(synced.len(), 3);
         assert_eq!(
             synced[0],
-            CardType::New(NewFlashcard {
+            CardType::New(Flashcard {
+                id: None,
                 question: "A new flashcard! What a day.".to_string(),
                 answer: "a1".to_string(),
             })
@@ -162,14 +170,15 @@ mod tests {
         assert_eq!(
             synced[1],
             CardType::Old(Flashcard {
-                id: 2,
+                id: None,
                 question: "text of question 2 is a bore to be honest.".to_string(),
                 answer: "a2".to_string(),
             })
         );
         assert_eq!(
             synced[2],
-            CardType::New(NewFlashcard {
+            CardType::New(Flashcard {
+                id: None,
                 question: "Some fascinating text".to_string(),
                 answer: "a3".to_string(),
             })
