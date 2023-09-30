@@ -16,12 +16,18 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "fs": {
+        "scope": ["$RESOURCE/*"]
       }
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev"
+      "identifier": "com.tauri.dev",
+      "resources": [
+        "../external/*"
+      ]
     },
     "security": {
       "csp": null

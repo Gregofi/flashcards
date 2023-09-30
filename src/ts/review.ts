@@ -1,5 +1,6 @@
 import { Card } from './types/card.ts';
 import { getCardsToReview, saveAnswer } from './commands';
+import './mathjax';
 
 let toReview: Card[] = [];
 let flipped = false;
@@ -41,6 +42,7 @@ const renderCurrentCard = () => {
   } else {
     cardText.textContent = card.question;
   }
+  window.MathJax.typesetPromise();
 }
 
 window.addEventListener("DOMContentLoaded", () => {
