@@ -5,9 +5,11 @@
 
 use dotenvy::dotenv;
 use models::flashcard::Flashcard;
+use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::SqlitePool;
 use std::env;
+use std::fs;
 
 mod models;
 mod parsers;
@@ -16,6 +18,7 @@ mod sync;
 mod db;
 
 use db::Db;
+use log::debug;
 use crate::models::answer::Answer;
 use crate::repetition_algs::prelude::*;
 
@@ -24,13 +27,25 @@ struct AppState {
 }
 
 pub async fn estabilish_connection() -> sqlx::Result<SqlitePool> {
-    dotenv().ok();
+    // TODO: Windows
+    let home = env::var("HOME").expect("Could not find home directory");
+    let app_path = env::var("DATABASE_URL").unwrap_or(format!("{}/.flashcards", home));
+    // TODO: We deliberately ignore this since the folder will often exists
+    let _ = fs::create_dir_all(&app_path);
+    let database_url = format!("{}/flashcards.db", app_path);
+    debug!("Opening database at {}", database_url);
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    SqlitePoolOptions::new()
+    if !sqlx::Sqlite::database_exists(&database_url).await? {
+        debug!("Database does not exist, creating");
+        sqlx::Sqlite::create_database(&database_url).await?;
+    }
+
+    let pool = SqlitePoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
-        .await
+        .await?;
+    sqlx::migrate!().run(&mut pool.acquire().await?).await?;
+    Ok(pool)
 }
 
 #[tauri::command]
