@@ -1,8 +1,10 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import { Card } from "./types/card";
 
+export const getCard = async (id: number): Promise<Card | null> => invoke("get_card", { id });
+
 export async function getCards(): Promise<Card[]> {
-  const cardsJson = await invoke("getAllCards") as Card[];
+  const cardsJson = await invoke("get_all_cards") as Card[];
   return cardsJson;
 }
 

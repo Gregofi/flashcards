@@ -3,7 +3,6 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
-use dotenvy::dotenv;
 use models::flashcard::Flashcard;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::SqlitePoolOptions;
@@ -51,6 +50,12 @@ pub async fn estabilish_connection() -> sqlx::Result<SqlitePool> {
 #[tauri::command]
 async fn get_all_cards(state: tauri::State<'_, AppState>) -> Result<Vec<Flashcard>, String> {
     state.db.get_cards().await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_card(id: i32, state: tauri::State<'_, AppState>) -> Result<Flashcard, String> {
+    state.db.get_card(id).await
         .map_err(|e| e.to_string())
 }
 
@@ -122,7 +127,7 @@ async fn main() {
     tauri::Builder::default()
         .setup(|_| {Ok(())})
         .manage(state)
-        .invoke_handler(tauri::generate_handler![get_all_cards, get_cards_to_review, answer_question, sync_flashcards])
+        .invoke_handler(tauri::generate_handler![get_all_cards, get_cards_to_review, answer_question, sync_flashcards, get_card])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -15,7 +15,7 @@
 }
 
 .container {
-    margin: 0;
+    margin: 0 auto;
     padding-top: 10vh;
     display: flex;
     flex-direction: column;
@@ -58,8 +58,8 @@ h1 {
 
 }
 
-#card-text {
-    max-width: 960px;
+.mw-800 {
+    max-width: 800px;
 }
 
 .answer-buttons {
@@ -110,6 +110,14 @@ button {
 }
 
 .review-buttons {
+}
+
+.card-text {
+    text-align: justify;
+}
+
+#cards {
+    text-align: left;
 }
 
 @media (prefers-color-scheme: dark) {

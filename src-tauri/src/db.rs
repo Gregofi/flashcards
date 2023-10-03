@@ -61,6 +61,21 @@ WHERE id = ?
         }
     }
 
+    pub async fn get_card(&self, id: i32) -> Result<Flashcard> {
+        sqlx::query("SELECT * FROM flashcard WHERE id = ?")
+            .bind(id)
+            .map(|row: SqliteRow| {
+                Flashcard {
+                    id: Some(row.get(0)),
+                    question: row.get(1),
+                    answer: row.get(2),
+                }
+            })
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| e.into())
+    }
+
     /// Pulls the cards from the database. Caches the result, pulls only once
     /// for multiple calls.
     pub async fn get_cards(&self) -> Result<Vec<Flashcard>> {
