@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import { Card } from "./types/card";
+import type { Card } from "./types/card";
 
 export const getCard = async (id: number): Promise<Card | null> => invoke("get_card", { id });
 
