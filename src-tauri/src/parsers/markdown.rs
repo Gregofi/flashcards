@@ -1,22 +1,23 @@
-use std::io::Result;
 use tokio::io::{AsyncBufRead, AsyncBufReadExt, Lines};
 
 use crate::models::flashcard::Flashcard;
+use anyhow::{anyhow, bail, Result};
 
 pub async fn read_until_hr<R: AsyncBufRead + Unpin>(lines: &mut Lines<R>) -> Result<String> {
     let mut text = String::new();
     while let Some(line) = lines.next_line().await? {
         // TODO: Something more generic for MD lines.
-        if line.starts_with("---") || line.starts_with("- - -") {
+        if line.starts_with("---")
+            || line.starts_with("- - -")
+            || line.starts_with("***")
+            || line.starts_with("* * *")
+        {
             return Ok(text);
         }
         text.push_str(line.trim());
         text.push('\n');
     }
-    Err(std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "A card was not terminated",
-    ))
+    Err(anyhow!("A card was not terminated"))
 }
 
 /**
@@ -38,6 +39,8 @@ pub async fn long_question<R: AsyncBufRead + Unpin>(
         id: None,
         question,
         answer,
+        folder: None,
+        path: None,
     })
 }
 
@@ -67,10 +70,7 @@ pub async fn read_markdown<R: AsyncBufRead + Unpin>(reader: R) -> Result<Vec<Fla
             let tags: Vec<String> = it.map(|s| s.to_string()).collect();
             let card = long_question(&mut line_it, tags).await?;
             if card.question.is_empty() {
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    "Card cannot have empty question or answer text",
-                ));
+                bail!("Card cannot have an empty question or answer text");
             }
             flashcards.push(card);
         } else {
@@ -83,24 +83,20 @@ pub async fn read_markdown<R: AsyncBufRead + Unpin>(reader: R) -> Result<Vec<Fla
             }
 
             if question.is_empty() {
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    "Card cannot have empty question text",
-                ));
+                bail!("Card cannot have empty question text");
             }
 
             let answer = read_until_hr(&mut line_it).await?;
             if answer.is_empty() {
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    "Card cannot have empty answer text",
-                ));
+                bail!("Card cannot have empty answer text");
             }
             println!("Question 2: >{}<", question);
             flashcards.push(Flashcard {
                 id: None,
                 question,
                 answer,
+                folder: None,
+                path: None,
             });
         }
     }
