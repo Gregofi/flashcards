@@ -11,10 +11,7 @@ pub enum CardType {
 /// If a new card has very similar question to an old card, it is considered
 /// the same card and the old card with its ID is returned. Otherwise, it is
 /// returned as a new card without any ID.
-pub async fn sync(
-    old_flashcards: &[Flashcard],
-    new_flashcards: Vec<Flashcard>,
-) -> Vec<CardType> {
+pub async fn sync(old_flashcards: &[Flashcard], new_flashcards: Vec<Flashcard>) -> Vec<CardType> {
     // This function has O(n^2 * string_distance_computation) complexity, which
     // can be devastating. We could and should do something about it, first
     // optimization would be to somehow use the files the flashcards came from

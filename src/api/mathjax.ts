@@ -1,10 +1,10 @@
 export {};
 
 declare global {
-  interface Window {
-    MathJax: {
-      typesetPromise: () => Promise<void>;
-      typeset: () => number;
-    };
-  }
+    interface Window {
+        MathJax: {
+            typesetPromise: () => Promise<void>;
+            typeset: () => number;
+        };
+    }
 }

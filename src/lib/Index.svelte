@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getCardsToReview } from '@api/commands';
-    
+
     let cards = [];
     getCardsToReview().then((_cards) => {
         cards = _cards;
@@ -9,7 +9,7 @@
 
 <div>
     <h1>Flashcards</h1>
-    <p>{ cards.length } cards loaded</p>
+    <p>{cards.length} cards loaded</p>
     <div>
         <a href="/review">Review cards</a>
     </div>
