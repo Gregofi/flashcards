@@ -10,16 +10,16 @@ use sqlx::SqlitePool;
 use std::env;
 use std::fs;
 
+mod db;
 mod models;
 mod parsers;
 mod repetition_algs;
 mod sync;
-mod db;
 
-use db::Db;
-use log::debug;
 use crate::models::answer::Answer;
 use crate::repetition_algs::prelude::*;
+use db::Db;
+use log::debug;
 
 struct AppState {
     db: Db,
@@ -49,25 +49,25 @@ pub async fn estabilish_connection() -> sqlx::Result<SqlitePool> {
 
 #[tauri::command]
 async fn get_all_cards(state: tauri::State<'_, AppState>) -> Result<Vec<Flashcard>, String> {
-    state.db.get_cards().await
-        .map_err(|e| e.to_string())
+    state.db.get_cards().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 async fn get_card(id: i32, state: tauri::State<'_, AppState>) -> Result<Flashcard, String> {
-    state.db.get_card(id).await
-        .map_err(|e| e.to_string())
+    state.db.get_card(id).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 async fn get_cards_to_review(state: tauri::State<'_, AppState>) -> Result<Vec<Flashcard>, String> {
     let ra = NaiveExponentialRA::new(50, 128);
-    let cards = state.db.get_cards().await
-        .map_err(|e| e.to_string())?;
+    let cards = state.db.get_cards().await.map_err(|e| e.to_string())?;
     let mut result = vec![];
     // We would like filter but async closures and such...
     for card in cards {
-        let answers = state.db.get_answers(&card).await
+        let answers = state
+            .db
+            .get_answers(&card)
+            .await
             .map_err(|e| e.to_string())?;
         if ra.repeat_question(&answers) {
             result.push(card);
@@ -77,9 +77,16 @@ async fn get_cards_to_review(state: tauri::State<'_, AppState>) -> Result<Vec<Fl
 }
 
 #[tauri::command]
-async fn answer_question(flashcard_id: i32, answer_rating: i32, state: tauri::State<'_, AppState>) -> Result<(), String> {
-    println!("Answering question {} with rating {}", flashcard_id, answer_rating);
-    if (answer_rating < 0) || (answer_rating > 100) {
+async fn answer_question(
+    flashcard_id: i32,
+    answer_rating: i32,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    println!(
+        "Answering question {} with rating {}",
+        flashcard_id, answer_rating
+    );
+    if !(0..=100).contains(&answer_rating) {
         return Err("Answer rating must be between 0 and 100".to_string());
     }
     let answer = Answer {
@@ -88,7 +95,11 @@ async fn answer_question(flashcard_id: i32, answer_rating: i32, state: tauri::St
         timestamp: chrono::Local::now().naive_local(),
         answer_rating,
     };
-    let x = state.db.persist_answer(answer).await.map_err(|e| e.to_string());
+    let x = state
+        .db
+        .persist_answer(answer)
+        .await
+        .map_err(|e| e.to_string());
     println!("Persisting answer");
     if x.is_err() {
         println!("Error: {}", x.unwrap_err());
@@ -98,19 +109,21 @@ async fn answer_question(flashcard_id: i32, answer_rating: i32, state: tauri::St
 
 #[tauri::command]
 async fn sync_flashcards(folder: String, state: tauri::State<'_, AppState>) -> Result<(), String> {
-    let new_cards = parsers::parser::parse_folder(&folder).await
+    let new_cards = parsers::parser::parse_folder(&folder)
+        .await
         .map_err(|e| e.to_string())?;
-    let old_cards = state.db.get_cards().await
-        .map_err(|e| e.to_string())?;
+    let old_cards = state.db.get_cards().await.map_err(|e| e.to_string())?;
     let synced_cards = sync::sync(&old_cards, new_cards).await;
     for card in synced_cards {
         match card {
             sync::CardType::New(card) => {
-                state.db.add_card(card).await
-                    .map_err(|e| e.to_string())?;
+                state.db.add_card(card).await.map_err(|e| e.to_string())?;
             }
             sync::CardType::Old(card) => {
-                state.db.update_card(&card).await
+                state
+                    .db
+                    .update_card(&card)
+                    .await
                     .map_err(|e| e.to_string())?;
             }
         }
@@ -121,13 +134,21 @@ async fn sync_flashcards(folder: String, state: tauri::State<'_, AppState>) -> R
 #[tokio::main]
 async fn main() {
     env_logger::init();
-    let pool = estabilish_connection().await.expect("Failed to connect to database");
+    let pool = estabilish_connection()
+        .await
+        .expect("Failed to connect to database");
     let db = Db::new(pool);
     let state = AppState { db };
     tauri::Builder::default()
-        .setup(|_| {Ok(())})
+        .setup(|_| Ok(()))
         .manage(state)
-        .invoke_handler(tauri::generate_handler![get_all_cards, get_cards_to_review, answer_question, sync_flashcards, get_card])
+        .invoke_handler(tauri::generate_handler![
+            get_all_cards,
+            get_cards_to_review,
+            answer_question,
+            sync_flashcards,
+            get_card
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

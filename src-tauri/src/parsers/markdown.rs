@@ -1,7 +1,7 @@
 use tokio::io::{AsyncBufRead, AsyncBufReadExt};
 
 use crate::models::flashcard::Flashcard;
-use std::io::{BufRead, Result};
+use std::io::Result;
 
 pub async fn read_markdown<R: AsyncBufRead + Unpin>(reader: R) -> Result<Vec<Flashcard>> {
     let mut flashcards = vec![];
@@ -29,7 +29,11 @@ pub async fn read_markdown<R: AsyncBufRead + Unpin>(reader: R) -> Result<Vec<Fla
         while let Some(line) = line_it.next_line().await? {
             // TODO: Something more generic for MD lines.
             if line.starts_with("---") || line.starts_with("- - -") {
-                flashcards.push(Flashcard { id: None, question, answer });
+                flashcards.push(Flashcard {
+                    id: None,
+                    question,
+                    answer,
+                });
                 break;
             }
             answer.push_str(line.as_str());
