@@ -32,12 +32,14 @@ VALUES (?, ?, ?)
     pub async fn add_card(&self, card: Flashcard) -> Result<()> {
         sqlx::query(
             "
-INSERT INTO flashcard (question, answer)
-VALUES (?, ?)
+INSERT INTO flashcard (question, answer, folder, path)
+VALUES (?, ?, ?, ?)
             ",
         )
         .bind(card.question)
         .bind(card.answer)
+        .bind(card.folder)
+        .bind(card.path)
         .execute(&self.pool)
         .await
         .map(|_| ())
@@ -71,6 +73,8 @@ WHERE id = ?
                 id: Some(row.get(0)),
                 question: row.get(1),
                 answer: row.get(2),
+                folder: row.get(3),
+                path: row.get(4),
             })
             .fetch_one(&self.pool)
             .await
@@ -85,6 +89,8 @@ WHERE id = ?
                 id: Some(row.get(0)),
                 question: row.get(1),
                 answer: row.get(2),
+                folder: row.get(3),
+                path: row.get(4),
             })
             .fetch_all(&self.pool)
             .await

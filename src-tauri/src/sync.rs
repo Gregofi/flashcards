@@ -34,6 +34,8 @@ pub async fn sync(old_flashcards: &[Flashcard], new_flashcards: Vec<Flashcard>) 
                     id: similar[0].id,
                     question: new_card.question,
                     answer: new_card.answer,
+                    folder: new_card.folder,
+                    path: new_card.path,
                 }),
                 _ => CardType::New(new_card),
             }
@@ -56,11 +58,15 @@ mod tests {
             id: None,
             question: "q1".to_string(),
             answer: "a1".to_string(),
+            folder: None,
+            path: None,
         }];
         let new = vec![Flashcard {
             id: None,
             question: "q1".to_string(),
             answer: "a1".to_string(),
+            folder: None,
+            path: None,
         }];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 1);
@@ -70,6 +76,8 @@ mod tests {
                 id: None,
                 question: "q1".to_string(),
                 answer: "a1".to_string(),
+                folder: None,
+                path: None,
             })
         );
     }
@@ -80,11 +88,15 @@ mod tests {
             id: None,
             question: "a very loong text that has one typo in it".to_string(),
             answer: "a1".to_string(),
+            folder: None,
+            path: None,
         }];
         let new = vec![Flashcard {
             id: None,
             question: "a very long text that has one typo in it".to_string(),
             answer: "a1".to_string(),
+            folder: None,
+            path: None,
         }];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 1);
@@ -94,6 +106,8 @@ mod tests {
                 id: None,
                 question: "a very long text that has one typo in it".to_string(),
                 answer: "a1".to_string(),
+                folder: None,
+                path: None,
             })
         );
     }
@@ -104,11 +118,15 @@ mod tests {
             id: None,
             question: "a flashcard".to_string(),
             answer: "a1".to_string(),
+            folder: None,
+            path: None,
         }];
         let new = vec![Flashcard {
             id: None,
             question: "arghargh".to_string(),
             answer: "a2".to_string(),
+            folder: None,
+            path: None,
         }];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 1);
@@ -118,6 +136,8 @@ mod tests {
                 id: None,
                 question: "arghargh".to_string(),
                 answer: "a2".to_string(),
+                folder: None,
+                path: None,
             })
         );
     }
@@ -129,11 +149,15 @@ mod tests {
                 id: None,
                 question: "text of question 1 is very interesting".to_string(),
                 answer: "a1".to_string(),
+                folder: None,
+                path: None,
             },
             Flashcard {
                 id: None,
                 question: "text of question 2 is a bore to be honest".to_string(),
                 answer: "a2".to_string(),
+                folder: None,
+                path: None,
             },
         ];
         let new = vec![
@@ -141,17 +165,23 @@ mod tests {
                 id: None,
                 question: "A new flashcard! What a day.".to_string(),
                 answer: "a1".to_string(),
+                folder: None,
+                path: None,
             },
             // Sync this one
             Flashcard {
                 id: None,
                 question: "text of question 2 is a bore to be honest.".to_string(),
                 answer: "a2".to_string(),
+                folder: None,
+                path: None,
             },
             Flashcard {
                 id: None,
                 question: "Some fascinating text".to_string(),
                 answer: "a3".to_string(),
+                folder: None,
+                path: None,
             },
         ];
         let synced = sync(&old, new).await;
@@ -162,6 +192,8 @@ mod tests {
                 id: None,
                 question: "A new flashcard! What a day.".to_string(),
                 answer: "a1".to_string(),
+                folder: None,
+                path: None,
             })
         );
         assert_eq!(
@@ -170,6 +202,8 @@ mod tests {
                 id: None,
                 question: "text of question 2 is a bore to be honest.".to_string(),
                 answer: "a2".to_string(),
+                folder: None,
+                path: None,
             })
         );
         assert_eq!(
@@ -178,6 +212,8 @@ mod tests {
                 id: None,
                 question: "Some fascinating text".to_string(),
                 answer: "a3".to_string(),
+                folder: None,
+                path: None,
             })
         );
     }
