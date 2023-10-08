@@ -25,6 +25,13 @@ struct AppState {
     db: Db,
 }
 
+pub fn chained_errs_to_string(err: anyhow::Error) -> String {
+    err.chain()
+        .map(|e| e.to_string())
+        .collect::<Vec<_>>()
+        .join("; ")
+}
+
 pub async fn estabilish_connection() -> sqlx::Result<SqlitePool> {
     // TODO: Windows
     let home = env::var("HOME").expect("Could not find home directory");
@@ -49,18 +56,18 @@ pub async fn estabilish_connection() -> sqlx::Result<SqlitePool> {
 
 #[tauri::command]
 async fn get_all_cards(state: tauri::State<'_, AppState>) -> Result<Vec<Flashcard>, String> {
-    state.db.get_cards().await.map_err(|e| e.to_string())
+    state.db.get_cards().await.map_err(chained_errs_to_string)
 }
 
 #[tauri::command]
 async fn get_card(id: i32, state: tauri::State<'_, AppState>) -> Result<Flashcard, String> {
-    state.db.get_card(id).await.map_err(|e| e.to_string())
+    state.db.get_card(id).await.map_err(chained_errs_to_string)
 }
 
 #[tauri::command]
 async fn get_cards_to_review(state: tauri::State<'_, AppState>) -> Result<Vec<Flashcard>, String> {
     let ra = NaiveExponentialRA::new(50, 128);
-    let cards = state.db.get_cards().await.map_err(|e| e.to_string())?;
+    let cards = state.db.get_cards().await.map_err(chained_errs_to_string)?;
     let mut result = vec![];
     // We would like filter but async closures and such...
     for card in cards {
@@ -68,7 +75,7 @@ async fn get_cards_to_review(state: tauri::State<'_, AppState>) -> Result<Vec<Fl
             .db
             .get_answers(&card)
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(chained_errs_to_string)?;
         if ra.repeat_question(&answers) {
             result.push(card);
         }
@@ -99,7 +106,7 @@ async fn answer_question(
         .db
         .persist_answer(answer)
         .await
-        .map_err(|e| e.to_string());
+        .map_err(chained_errs_to_string);
     println!("Persisting answer");
     if x.is_err() {
         println!("Error: {}", x.unwrap_err());
@@ -111,7 +118,7 @@ async fn answer_question(
 async fn sync_flashcards(folder: String, state: tauri::State<'_, AppState>) -> Result<(), String> {
     let new_cards = parsers::parser::parse_folder(&folder)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(chained_errs_to_string)?;
     let old_cards = state.db.get_cards().await.map_err(|e| e.to_string())?;
     let synced_cards = sync::sync(&old_cards, new_cards).await;
     for card in synced_cards {

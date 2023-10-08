@@ -1,6 +1,25 @@
+<script lang="ts">
+    import { SvelteToast } from '@zerodevx/svelte-toast';
+
+    const options = {};
+</script>
+
+<nav>
+    <ul>
+        <li>
+            <a href="/">Home</a>
+        </li>
+        <li>
+            <a href="/settings">Settings</a>
+        </li>
+    </ul>
+</nav>
+
 <div class="container">
     <slot />
 </div>
+
+<SvelteToast {options} />
 
 <style>
     .container {
