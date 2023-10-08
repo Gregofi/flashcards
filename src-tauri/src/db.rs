@@ -32,7 +32,7 @@ VALUES (?, ?, ?)
     pub async fn add_card(&self, card: Flashcard) -> Result<()> {
         sqlx::query(
             "
-INSERT INTO flashcard (question, answer, folder, path)
+INSERT INTO flashcard (question, answer, folder_path, file_path)
 VALUES (?, ?, ?, ?)
             ",
         )

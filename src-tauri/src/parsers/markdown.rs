@@ -1,7 +1,7 @@
 use tokio::io::{AsyncBufRead, AsyncBufReadExt, Lines};
 
 use crate::models::flashcard::Flashcard;
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 
 pub async fn read_until_hr<R: AsyncBufRead + Unpin>(lines: &mut Lines<R>) -> Result<String> {
     let mut text = String::new();
@@ -12,12 +12,12 @@ pub async fn read_until_hr<R: AsyncBufRead + Unpin>(lines: &mut Lines<R>) -> Res
             || line.starts_with("***")
             || line.starts_with("* * *")
         {
-            return Ok(text);
+            break;
         }
         text.push_str(line.trim());
         text.push('\n');
     }
-    Err(anyhow!("A card was not terminated"))
+    Ok(text)
 }
 
 /**
@@ -34,6 +34,10 @@ pub async fn long_question<R: AsyncBufRead + Unpin>(
 ) -> Result<Flashcard> {
     let question = read_until_hr(reader).await?;
     let answer = read_until_hr(reader).await?;
+
+    if question.is_empty() || answer.is_empty() {
+        bail!("Card cannot have an empty question or answer text");
+    }
 
     Ok(Flashcard {
         id: None,
@@ -69,9 +73,6 @@ pub async fn read_markdown<R: AsyncBufRead + Unpin>(reader: R) -> Result<Vec<Fla
             let it = line.split('#');
             let tags: Vec<String> = it.map(|s| s.to_string()).collect();
             let card = long_question(&mut line_it, tags).await?;
-            if card.question.is_empty() {
-                bail!("Card cannot have an empty question or answer text");
-            }
             flashcards.push(card);
         } else {
             let mut it = line.split('#');
@@ -90,7 +91,6 @@ pub async fn read_markdown<R: AsyncBufRead + Unpin>(reader: R) -> Result<Vec<Fla
             if answer.is_empty() {
                 bail!("Card cannot have empty answer text");
             }
-            println!("Question 2: >{}<", question);
             flashcards.push(Flashcard {
                 id: None,
                 question,

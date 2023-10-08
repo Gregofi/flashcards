@@ -18,14 +18,15 @@ pub async fn parse_folder(folder_path: &str) -> Result<Vec<Flashcard>> {
         debug!("visiting file {}", fname);
         if fname.ends_with(".md") {
             let path = entry.path();
+            let path_stringified = path.to_string_lossy();
             let file = File::open(path).await?;
             let reader = BufReader::new(file);
             let cards = read_markdown(reader)
                 .await
-                .with_context(|| format!("Failed to parse markdown: {}", fname))?;
+                .with_context(|| format!("Failed to parse markdown: {}", path_stringified))?;
             let cards: Vec<_> = cards
                 .into_iter()
-                .map(|c| c.with_path(folder_path.to_string(), fname.to_string()))
+                .map(|c| c.with_path(folder_path.to_string(), path_stringified.to_string()))
                 .collect();
             cards_vec.extend(cards);
         } else {

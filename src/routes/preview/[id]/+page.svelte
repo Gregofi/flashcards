@@ -13,6 +13,7 @@
     <p>loading...</p>
 {:then card}
     <div class="card-container">
+        <p>Card at <code>{card.path}</code></p>
         <h2>Question</h2>
         <p>{@html converter.makeHtml(card.question)}</p>
         <h2>Answer</h2>
