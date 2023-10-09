@@ -29,15 +29,17 @@ pub async fn sync(old_flashcards: &[Flashcard], new_flashcards: Vec<Flashcard>) 
                     levenshtein(&old_card.question, &new_card.question) <= qe_limit
                 })
                 .collect();
+            println!("{:?}", similar);
             match similar.len() {
-                1 => CardType::Old(Flashcard {
+                // TODO: Take the closest.
+                0 => CardType::New(new_card),
+                _ => CardType::Old(Flashcard {
                     id: similar[0].id,
                     question: new_card.question,
                     answer: new_card.answer,
                     folder: new_card.folder,
                     path: new_card.path,
                 }),
-                _ => CardType::New(new_card),
             }
         })
         .collect()
@@ -216,5 +218,30 @@ mod tests {
                 path: None,
             })
         );
+    }
+
+    // TODO: Use everywhere
+    fn question(q: &str) -> Flashcard {
+        Flashcard {
+            id: None,
+            question: q.to_string(),
+            answer: "a1".to_string(),
+            folder: None,
+            path: None,
+        }
+    }
+
+    #[tokio::test]
+    async fn multiple_similar() {
+        let new = [
+            question("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        ];
+        let old = [
+            question("baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            question("abaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        ];
+        let synced = sync(&old, new.to_vec()).await;
+        assert_eq!(synced.len(), 1);
+        assert!(matches!(synced[0], CardType::Old(_)));
     }
 }
