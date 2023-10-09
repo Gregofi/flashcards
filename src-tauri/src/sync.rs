@@ -49,6 +49,17 @@ pub async fn sync(old_flashcards: &[Flashcard], new_flashcards: Vec<Flashcard>) 
 mod tests {
     use super::*;
 
+    // TODO: Use everywhere
+    fn question(q: &str) -> Flashcard {
+        Flashcard {
+            id: None,
+            question: q.to_string(),
+            answer: "a1".to_string(),
+            folder: None,
+            path: None,
+        }
+    }
+
     #[tokio::test]
     async fn empty_sync() {
         assert_eq!(sync(&vec![], vec![]).await, vec![]);
@@ -56,20 +67,8 @@ mod tests {
 
     #[tokio::test]
     async fn no_sync() {
-        let old = vec![Flashcard {
-            id: None,
-            question: "q1".to_string(),
-            answer: "a1".to_string(),
-            folder: None,
-            path: None,
-        }];
-        let new = vec![Flashcard {
-            id: None,
-            question: "q1".to_string(),
-            answer: "a1".to_string(),
-            folder: None,
-            path: None,
-        }];
+        let old = vec![question("q1")];
+        let new = vec![question("q1")];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 1);
         assert_eq!(
@@ -86,20 +85,8 @@ mod tests {
 
     #[tokio::test]
     async fn sync_one() {
-        let old = vec![Flashcard {
-            id: None,
-            question: "a very loong text that has one typo in it".to_string(),
-            answer: "a1".to_string(),
-            folder: None,
-            path: None,
-        }];
-        let new = vec![Flashcard {
-            id: None,
-            question: "a very long text that has one typo in it".to_string(),
-            answer: "a1".to_string(),
-            folder: None,
-            path: None,
-        }];
+        let old = vec![question("a very loong text that has one typo in it")];
+        let new = vec![question("a very long text that has one typo in it")];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 1);
         assert_eq!(
@@ -116,20 +103,8 @@ mod tests {
 
     #[tokio::test]
     async fn add_and_remove() {
-        let old = vec![Flashcard {
-            id: None,
-            question: "a flashcard".to_string(),
-            answer: "a1".to_string(),
-            folder: None,
-            path: None,
-        }];
-        let new = vec![Flashcard {
-            id: None,
-            question: "arghargh".to_string(),
-            answer: "a2".to_string(),
-            folder: None,
-            path: None,
-        }];
+        let old = vec![question("a flashcard")];
+        let new = vec![question("arghargh")];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 1);
         assert_eq!(
@@ -137,7 +112,7 @@ mod tests {
             CardType::New(Flashcard {
                 id: None,
                 question: "arghargh".to_string(),
-                answer: "a2".to_string(),
+                answer: "a1".to_string(),
                 folder: None,
                 path: None,
             })
@@ -147,44 +122,13 @@ mod tests {
     #[tokio::test]
     async fn sync_multiple() {
         let old = vec![
-            Flashcard {
-                id: None,
-                question: "text of question 1 is very interesting".to_string(),
-                answer: "a1".to_string(),
-                folder: None,
-                path: None,
-            },
-            Flashcard {
-                id: None,
-                question: "text of question 2 is a bore to be honest".to_string(),
-                answer: "a2".to_string(),
-                folder: None,
-                path: None,
-            },
+            question("text of question 1 is very interesting"),
+            question("text of question 2 is a bore to be honest"),
         ];
         let new = vec![
-            Flashcard {
-                id: None,
-                question: "A new flashcard! What a day.".to_string(),
-                answer: "a1".to_string(),
-                folder: None,
-                path: None,
-            },
-            // Sync this one
-            Flashcard {
-                id: None,
-                question: "text of question 2 is a bore to be honest.".to_string(),
-                answer: "a2".to_string(),
-                folder: None,
-                path: None,
-            },
-            Flashcard {
-                id: None,
-                question: "Some fascinating text".to_string(),
-                answer: "a3".to_string(),
-                folder: None,
-                path: None,
-            },
+            question("A new flashcard! What a day."),
+            question("text of question 2 is a bore to be honest."),
+            question("Some fascinating text"),
         ];
         let synced = sync(&old, new).await;
         assert_eq!(synced.len(), 3);
@@ -203,7 +147,7 @@ mod tests {
             CardType::Old(Flashcard {
                 id: None,
                 question: "text of question 2 is a bore to be honest.".to_string(),
-                answer: "a2".to_string(),
+                answer: "a1".to_string(),
                 folder: None,
                 path: None,
             })
@@ -213,29 +157,16 @@ mod tests {
             CardType::New(Flashcard {
                 id: None,
                 question: "Some fascinating text".to_string(),
-                answer: "a3".to_string(),
+                answer: "a1".to_string(),
                 folder: None,
                 path: None,
             })
         );
     }
 
-    // TODO: Use everywhere
-    fn question(q: &str) -> Flashcard {
-        Flashcard {
-            id: None,
-            question: q.to_string(),
-            answer: "a1".to_string(),
-            folder: None,
-            path: None,
-        }
-    }
-
     #[tokio::test]
     async fn multiple_similar() {
-        let new = [
-            question("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-        ];
+        let new = [question("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")];
         let old = [
             question("baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
             question("abaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
