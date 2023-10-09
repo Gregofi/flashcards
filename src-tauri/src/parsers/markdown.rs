@@ -164,8 +164,10 @@ mod tests {
     async fn test_unterminated_question() {
         let markdown = "question #flashcard\nanswer\n";
         let reader = Cursor::new(markdown);
-        let flashcards = read_markdown(reader).await;
-        assert!(flashcards.is_err());
+        let flashcards = read_markdown(reader).await.unwrap();
+        assert_eq!(flashcards.len(), 1);
+        assert_eq!(flashcards[0].question, "question");
+        assert_eq!(flashcards[0].answer, "answer\n");
     }
 
     #[tokio::test]
