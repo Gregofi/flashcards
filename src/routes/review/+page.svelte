@@ -1,7 +1,6 @@
 <script lang="ts">
     import { getCardsToReview, saveAnswer } from '@api/commands';
-    import Showdown from 'showdown';
-    const converter = new Showdown.Converter();
+    import { HtmlToMarkdown } from '@api/markdown';
     import type { Card } from '@api/types/card';
     import '@api/mathjax';
 
@@ -38,9 +37,9 @@
             {#if cards.length === 0}
                 <div>Nothing to review</div>
             {:else if !flipped}
-                <div class="question">{@html converter.makeHtml(cards.slice(-1)[0].question)}</div>
+                <div class="question">{@html HtmlToMarkdown(cards.slice(-1)[0].question)}</div>
             {:else}
-                <div class="answer">{@html converter.makeHtml(cards.slice(-1)[0].answer)}</div>
+                <div class="answer">{@html HtmlToMarkdown(cards.slice(-1)[0].answer)}</div>
             {/if}
         {/if}
     </div>

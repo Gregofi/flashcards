@@ -1,9 +1,8 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { getCard } from '@api/commands';
-    import Showdown from 'showdown';
+    import { HtmlToMarkdown } from '@api/markdown';
 
-    const converter = new Showdown.Converter();
     const id = parseInt($page.params.id);
     const card = getCard(id);
     setTimeout(window.MathJax.typeset, 0);
@@ -15,9 +14,9 @@
     <div class="card-container">
         <p>Card at <code>{card.path}</code></p>
         <h2>Question</h2>
-        <p>{@html converter.makeHtml(card.question)}</p>
+        <p>{@html HtmlToMarkdown(card.question)}</p>
         <h2>Answer</h2>
-        <p>{@html converter.makeHtml(card.answer)}</p>
+        <p>{@html HtmlToMarkdown(card.answer)}</p>
     </div>
     <a href="/preview">go back</a>
 {:catch error}
