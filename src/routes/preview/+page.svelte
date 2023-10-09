@@ -2,11 +2,10 @@
     import { getCards } from '@api/commands';
     import { onMount } from 'svelte';
     import type { Card } from '@api/types/card';
-    import Showdown from 'showdown';
     import '@api/mathjax';
+    import { HtmlToMarkdown } from '@api/markdown';
 
     let cards: Card[] = [];
-    const converter = new Showdown.Converter();
 
     onMount(async () => {
         // We want to get cards before
@@ -20,7 +19,7 @@
     {#each cards as card}
         <div class="card-container">
             <div class="card-id"><p><a href="/preview/{card.id}">{card.id}</a></p></div>
-            <div class="card-text">{@html converter.makeHtml(card.question)}</div>
+            <div class="card-text">{@html HtmlToMarkdown(card.question)}</div>
         </div>
     {/each}
 </div>
