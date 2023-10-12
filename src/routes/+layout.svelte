@@ -15,12 +15,6 @@
     </ul>
 </nav>
 
-<div class="container">
-    <slot />
-</div>
-
-<SvelteToast {options} />
-
 <style>
     .container {
         margin: 0 auto;
@@ -29,6 +23,12 @@
         display: flex;
         flex-direction: column;
         text-align: center;
-        height: -webkit-fill-available;
     }
 </style>
+
+<div class="container">
+    <slot />
+</div>
+
+<SvelteToast {options} />
+
