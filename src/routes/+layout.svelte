@@ -15,6 +15,12 @@
     </ul>
 </nav>
 
+<div class="container">
+    <slot />
+</div>
+
+<SvelteToast {options} />
+
 <style>
     .container {
         margin: 0 auto;
@@ -25,10 +31,3 @@
         text-align: center;
     }
 </style>
-
-<div class="container">
-    <slot />
-</div>
-
-<SvelteToast {options} />
-
