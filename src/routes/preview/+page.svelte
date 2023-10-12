@@ -14,34 +14,27 @@
     });
 </script>
 
-<h1>Card Preview</h1>
-<div class="cards-container">
-    {#each cards as card}
-        <div class="card-container">
-            <div class="card-id"><p><a href="/preview/{card.id}">{card.id}</a></p></div>
-            <div class="card-text">{@html HtmlToMarkdown(card.question)}</div>
-        </div>
-    {/each}
+<div>
+    <table class="w-full">
+        <thead class="uppercase text-sm">
+            <tr>
+                <th class="px-6 py-3">id</th>
+                <th class="px-6 py-3">question</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each cards as card}
+                <tr
+                    class="border-b h-8 min-h-full hover:bg-gray-50 hover:cursor-pointer"
+                    on:click={(window.location = `/preview/${card.id}`)}
+                >
+                    <td>{card.id}</td>
+                    <td class="text-left">{@html HtmlToMarkdown(card.question)}</td>
+                </tr>
+            {/each}
+        </tbody>
+    </table>
 </div>
 
 <style>
-    .cards-container {
-        text-align: left;
-    }
-
-    .card-container {
-        display: flex;
-        flex-direction: row;
-        border: 1px solid gray;
-    }
-
-    .card-id {
-        border-right: 1px solid gray;
-        width: 50px;
-        text-align: center;
-    }
-
-    .card-text {
-        margin-left: 10px;
-    }
 </style>
