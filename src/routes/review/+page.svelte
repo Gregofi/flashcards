@@ -21,6 +21,7 @@
 
         flipped = false;
 
+        setTimeout(window.MathJax.typeset, 0);
         return cards;
     };
     const flip = () => {
