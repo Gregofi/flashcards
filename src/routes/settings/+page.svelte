@@ -34,9 +34,9 @@
     };
 </script>
 
-<div class="settings-container">
-    <button class="btn btn-primary" on:click={sync}>Synchronize flashcards from folder</button>
+<div class="text-left">
+    <button
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded"
+        on:click={sync}>Synchronize flashcards from folder</button
+    >
 </div>
-
-<style>
-</style>

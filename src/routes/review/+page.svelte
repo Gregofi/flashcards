@@ -29,116 +29,48 @@
         // Run after DOM settles.
         setTimeout(window.MathJax.typeset, 0);
     };
+
+    // TODO: Lift buttons into separate component.
+    const buttons = [
+        { score: 100, text: 'Good', style: 'from-green-700 via-green-600 to-green-600' },
+        { score: 66, text: 'Decent', style: 'from-green-600 via-lime-600 to-lime-600' },
+        { score: 33, text: 'Bad', style: 'from-amber-400 via-amber-500 to-amber-600' },
+        { score: 0, text: 'Worst', style: 'from-red-600 via-red-700 to-red-800' }
+    ];
 </script>
 
 <div class="review-container">
     <div class="review-main">
-        <h1>Review</h1>
+        <h1 class="text-3xl mb-4">Review</h1>
         {#if cards !== null}
             {#if cards.length === 0}
                 <div>Nothing to review</div>
             {:else if !flipped}
-                <div class="question">{@html HtmlToMarkdown(cards.slice(-1)[0].question)}</div>
+                <div class="text-justify">{@html HtmlToMarkdown(cards.slice(-1)[0].question)}</div>
             {:else}
-                <div class="answer">{@html HtmlToMarkdown(cards.slice(-1)[0].answer)}</div>
+                <div class="text-justify">{@html HtmlToMarkdown(cards.slice(-1)[0].answer)}</div>
             {/if}
         {/if}
     </div>
-    <div class="bottom-container">
+    <div class="bottom-container mx-auto mt-24">
         {#if cards !== null}
-            <div class="answer-buttons">
-                <button
-                    class="btn-answer"
-                    on:click={() => {
-                        cards = updateState(cards ?? [], 100);
-                    }}>Good</button
-                >
-                <button
-                    class="btn-answer"
-                    on:click={() => {
-                        cards = updateState(cards ?? [], 66);
-                    }}>Decent</button
-                >
-                <button
-                    class="btn-answer"
-                    on:click={() => {
-                        cards = updateState(cards ?? [], 33);
-                    }}>Bad</button
-                >
-                <button
-                    class="btn-answer"
-                    on:click={() => {
-                        cards = updateState(cards ?? [], 0);
-                    }}>Worst</button
-                >
+            <div class="mx-auto flex flex-row flex-grow justify-center">
+                {#each buttons as { score, text, style }}
+                    <button
+                        class="m-1 w-32 h-10 text-white bg-gradient-to-r {style} hover:scale-110 transition"
+                        on:click={() => {
+                            cards = updateState(cards ?? [], score);
+                        }}>{text}</button
+                    >
+                {/each}
             </div>
-            <button id="btn-flip" on:click={flip}>Flip</button>
-            <div>
-                <a href="/">Back to home</a>
-            </div>
+            <button
+                class="mt-5 w-52 h-12 m-1 mx-auto text-white bg-blue-500 font-semibold text-lg hover:scale-110 transition"
+                on:click={flip}>Flip card</button
+            >
         {/if}
     </div>
 </div>
 
 <style>
-    .review-container {
-    }
-
-    .bottom-container {
-        margin: 0 auto;
-        margin-top: 50px;
-    }
-
-    .answer-buttons {
-        margin: 0 auto;
-        display: flex;
-        flex-direction: row;
-        flex-grow: 1;
-        justify-content: center;
-    }
-
-    .question,
-    .answer {
-        text-align: justify;
-    }
-
-    .btn-answer {
-        margin: 2px;
-        width: 100px;
-    }
-
-    #btn-flip {
-        margin: 1em auto;
-        width: 300px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    button {
-        border: 1px solid transparent;
-        padding: 0.6em 1.2em;
-        font-size: 1em;
-        font-weight: 500;
-        font-family: inherit;
-        color: #0f0f0f;
-        background-color: #ffffff;
-        transition: border-color 0.25s;
-        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-    }
-
-    button {
-        cursor: pointer;
-    }
-
-    button:hover {
-        border-color: #396cd8;
-    }
-    button:active {
-        border-color: #396cd8;
-        background-color: #e8e8e8;
-    }
-
-    button {
-        outline: none;
-    }
 </style>
