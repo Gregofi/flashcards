@@ -72,11 +72,11 @@
                     }}>Worst</button
                 >
             </div>
+            <button id="btn-flip" on:click={flip}>Flip</button>
+            <div>
+                <a href="/">Back to home</a>
+            </div>
         {/if}
-        <button id="btn-flip" on:click={flip}>Flip</button>
-        <div>
-            <a href="/">Back to home</a>
-        </div>
     </div>
 </div>
 
@@ -104,11 +104,14 @@
 
     .btn-answer {
         margin: 2px;
+        width: 100px;
     }
 
     #btn-flip {
         margin: 1em auto;
-        width: 30%;
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     button {
