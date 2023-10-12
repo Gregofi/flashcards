@@ -44,7 +44,7 @@
             {/if}
         {/if}
     </div>
-    <div>
+    <div class="bottom-container">
         {#if cards !== null}
             <div class="answer-buttons">
                 <button
@@ -82,13 +82,11 @@
 
 <style>
     .review-container {
-        margin: 0;
-        padding-top: 10vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        text-align: center;
-        height: -webkit-fill-available;
+    }
+
+    .bottom-container {
+        margin: 0 auto;
+        margin-top: 50px;
     }
 
     .answer-buttons {
