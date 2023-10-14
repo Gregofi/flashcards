@@ -4,6 +4,7 @@
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
 use models::flashcard::Flashcard;
+use rand::seq::SliceRandom;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::SqlitePool;
@@ -33,7 +34,12 @@ pub fn chained_errs_to_string(err: anyhow::Error) -> String {
 }
 
 pub async fn estabilish_connection() -> sqlx::Result<SqlitePool> {
-    // TODO: Windows
+    // TODO: Windows. We would like to use the tauri getAppDataDir or whatever,
+    // however, this requires app config. That would require that this functions
+    // runs after the app is set up. We could make it a command and invoke it from
+    // the frontend, but that would mean we would have to have the DB as optional
+    // and it doesn't really make sense to run the app without a DB, so we would
+    // have to needlessly unwrap or check the item.
     let home = env::var("HOME").expect("Could not find home directory");
     let app_path = env::var("DATABASE_URL").unwrap_or(format!("{}/.flashcards", home));
     // TODO: We deliberately ignore this since the folder will often exists
@@ -65,7 +71,10 @@ async fn get_card(id: i32, state: tauri::State<'_, AppState>) -> Result<Flashcar
 }
 
 #[tauri::command]
-async fn get_cards_to_review(state: tauri::State<'_, AppState>) -> Result<Vec<Flashcard>, String> {
+async fn get_cards_to_review(
+    shuffle: bool,
+    state: tauri::State<'_, AppState>,
+) -> Result<Vec<Flashcard>, String> {
     let ra = NaiveExponentialRA::new(50, 128);
     let cards = state.db.get_cards().await.map_err(chained_errs_to_string)?;
     let mut result = vec![];
@@ -79,6 +88,9 @@ async fn get_cards_to_review(state: tauri::State<'_, AppState>) -> Result<Vec<Fl
         if ra.repeat_question(&answers) {
             result.push(card);
         }
+    }
+    if shuffle {
+        result.shuffle(&mut rand::thread_rng());
     }
     Ok(result)
 }

@@ -13,7 +13,7 @@ edition = "2021"
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
-tauri = { version = "1.4", features = [ "fs-all", "dialog-open", "shell-open"] }
+tauri = { version = "1.4", features = [ "path-all", "fs-all", "dialog-open", "shell-open"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dotenvy = "0.15"
@@ -26,6 +26,7 @@ strsim = "0.10.0"
 tokio = { version = "1.32.0", features = ["full"] }
 anyhow = "1.0.75"
 sqlx = { version = "0.7.2", features = ["runtime-tokio", "sqlite", "chrono"] }
+rand = "0.8.5"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

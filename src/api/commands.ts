@@ -8,7 +8,8 @@ export async function getCards(): Promise<Card[]> {
     return cardsJson;
 }
 
-export const getCardsToReview = async () => invoke('get_cards_to_review') as Promise<Card[]>;
+export const getCardsToReview = async (shuffle: boolean) =>
+    invoke('get_cards_to_review', { shuffle }) as Promise<Card[]>;
 
 export const saveAnswer = async (flashcardId: number, answerRating: number) =>
     invoke('answer_question', { flashcardId, answerRating });

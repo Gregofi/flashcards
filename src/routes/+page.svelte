@@ -2,7 +2,7 @@
     import { getCardsToReview } from '@api/commands';
 
     let cards = [];
-    getCardsToReview().then((_cards) => {
+    getCardsToReview(false).then((_cards) => {
         cards = _cards;
     });
 </script>
