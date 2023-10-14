@@ -11,6 +11,7 @@
         "strict": true,
         "paths": {
             "@api/*": ["./src/api/*"],
+            "@stores/*": ["./src/api/*"],
             "$lib": ["./src/lib"],
             "$lib/*": ["./src/lib/*"]
         }

@@ -5,7 +5,8 @@ import { defineConfig } from 'vite';
 export default defineConfig(async () => ({
     resolve: {
         alias: {
-            '@api': '/src/api'
+            '@api': '/src/api',
+            '@stores': '/src/stores'
         }
     },
     clearScreen: false,

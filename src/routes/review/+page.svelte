@@ -2,12 +2,15 @@
     import { getCardsToReview, saveAnswer } from '@api/commands';
     import { HtmlToMarkdown } from '@api/markdown';
     import type { Card } from '@api/types/card';
+    import { getConfig } from '@api/preferences';
     import '@api/mathjax';
+
+    const cfg = getConfig();
 
     let cards: Card[] | null;
     $: cards = null;
     $: flipped = false;
-    getCardsToReview().then((cards_) => {
+    getCardsToReview(cfg.randomShuffle ?? false).then((cards_) => {
         cards = cards_.toReversed();
         setTimeout(window.MathJax.typeset, 0);
     });
@@ -32,10 +35,10 @@
 
     // TODO: Lift buttons into separate component.
     const buttons = [
-        { score: 100, text: 'Good', style: 'from-green-700 via-green-600 to-green-600' },
-        { score: 66, text: 'Decent', style: 'from-green-600 via-lime-600 to-lime-600' },
-        { score: 33, text: 'Bad', style: 'from-amber-400 via-amber-500 to-amber-600' },
-        { score: 0, text: 'Worst', style: 'from-red-600 via-red-700 to-red-800' }
+        { score: 100, text: 'Good', style: 'bg-green-700' },
+        { score: 66, text: 'Decent', style: 'bg-lime-500' },
+        { score: 33, text: 'Bad', style: 'bg-amber-500' },
+        { score: 0, text: 'Worst', style: 'bg-red-700' }
     ];
 </script>
 
@@ -57,7 +60,7 @@
             <div class="mx-auto flex flex-row flex-grow justify-center">
                 {#each buttons as { score, text, style }}
                     <button
-                        class="m-1 w-32 h-10 text-white bg-gradient-to-r {style} hover:scale-110 transition"
+                        class="m-1 w-32 h-10 text-white {style} hover:scale-110 transition"
                         on:click={() => {
                             cards = updateState(cards ?? [], score);
                         }}>{text}</button

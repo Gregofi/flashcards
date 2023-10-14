@@ -21,14 +21,16 @@
         "open": true
       },
       "fs": {
-        "all": true,
-        "scope": ["$RESOURCE/*"]
+        "all": true
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "flashcards",
       "resources": [
         "../external/*"
       ]
