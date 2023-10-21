@@ -3,7 +3,7 @@
     import { onMount } from 'svelte';
     import type { Card } from '@api/types/card';
     import '@api/mathjax';
-    import { HtmlToMarkdown } from '@api/markdown';
+    import { markdownToHtml } from '@api/markdown';
 
     let cards: Card[] = [];
 
@@ -29,7 +29,7 @@
                     on:click={(window.location = `/preview/${card.id}`)}
                 >
                     <td>{card.id}</td>
-                    <td class="text-left">{@html HtmlToMarkdown(card.question)}</td>
+                    <td class="text-left">{@html markdownToHtml(card.question)}</td>
                 </tr>
             {/each}
         </tbody>
