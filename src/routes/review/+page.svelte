@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getCardsToReview, saveAnswer } from '@api/commands';
-    import { HtmlToMarkdown } from '@api/markdown';
+    import { markdownToHtml } from '@api/markdown';
     import type { Card } from '@api/types/card';
     import { getConfig } from '@api/preferences';
     import '@api/mathjax';
@@ -49,9 +49,9 @@
             {#if cards.length === 0}
                 <div>Nothing to review</div>
             {:else if !flipped}
-                <div class="text-justify">{@html HtmlToMarkdown(cards.slice(-1)[0].question)}</div>
+                <div>{@html markdownToHtml(cards.slice(-1)[0].question)}</div>
             {:else}
-                <div class="text-justify">{@html HtmlToMarkdown(cards.slice(-1)[0].answer)}</div>
+                <div>{@html markdownToHtml(cards.slice(-1)[0].answer)}</div>
             {/if}
         {/if}
     </div>
