@@ -16,7 +16,8 @@ In Haskell, a function does not accept multiple parameters in the tradditional s
 so `add(int, int) -> int` would not work here. Rather, it takes one number and returns
 a function that takes one number and returns an int:
 `Add :: (Integral a) => a -> a -> a`
-- - -
+
+---
 
 Haskell is a functional language, that means that you cannot "mutate" a state
 ... Rest of your notes.
@@ -25,6 +26,7 @@ Haskell is a functional language, that means that you cannot "mutate" a state
 The app can then watch folders with your notes and automatically sync them.
 
 ## How to build and run
+
 To build the application, first install dependencies via `npm` or `pnpm`
 
 ```
@@ -36,4 +38,3 @@ And then run the application
 ```
 pnpm run tauri dev
 ```
-
