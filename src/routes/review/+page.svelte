@@ -42,18 +42,20 @@
     ];
 </script>
 
-<div class="review-container">
-    <div class="review-main">
+<div>
+    <div>
         <h1 class="text-3xl mb-4">Review</h1>
-        {#if cards !== null}
-            {#if cards.length === 0}
-                <div>Nothing to review</div>
-            {:else if !flipped}
-                <div>{@html markdownToHtml(cards.slice(-1)[0].question)}</div>
-            {:else}
-                <div>{@html markdownToHtml(cards.slice(-1)[0].answer)}</div>
+        <div class="text-left">
+            {#if cards !== null}
+                {#if cards.length === 0}
+                    <div>Nothing to review</div>
+                {:else if !flipped}
+                    <div>{@html markdownToHtml(cards.slice(-1)[0].question)}</div>
+                {:else}
+                    <div>{@html markdownToHtml(cards.slice(-1)[0].answer)}</div>
+                {/if}
             {/if}
-        {/if}
+        </div>
     </div>
     <div class="bottom-container mx-auto mt-24">
         {#if cards !== null}
@@ -67,10 +69,21 @@
                     >
                 {/each}
             </div>
-            <button
-                class="mt-5 w-52 h-12 m-1 mx-auto text-white bg-blue-500 font-semibold text-lg hover:scale-110 transition"
-                on:click={flip}>Flip card</button
-            >
+            <div>
+                <button
+                    class="mt-5 w-52 h-12 m-1 mx-auto text-white bg-blue-500 font-semibold text-lg hover:scale-110 transition"
+                    on:click={flip}>Flip card</button
+                >
+            </div>
+            <div class="mt-2">
+                <button
+                    class="m-1 w-16 h-8 text-white bg-gray-700 hover:scale-110 transition"
+                    on:click={() => {
+                        flipped = false;
+                        cards = cards.slice(0, -1);
+                    }}>Skip</button
+                >
+            </div>
         {/if}
     </div>
 </div>
