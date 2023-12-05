@@ -2,7 +2,7 @@
     import { getCards } from '@api/commands';
     import { onMount } from 'svelte';
     import type { Card } from '@api/types/card';
-    import '@api/mathjax';
+    import katex from 'katex';
     import { markdownToHtml } from '@api/markdown';
 
     let cards: Card[] = [];
@@ -10,7 +10,7 @@
     onMount(async () => {
         // We want to get cards before
         cards = await getCards();
-        setTimeout(window.MathJax.typeset, 0);
+        setTimeout(katex.renderMathInElement(document.body), 0);
     });
 </script>
 

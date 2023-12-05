@@ -1,5 +1,6 @@
 <script lang="ts">
     import '../app.css';
+    import '../katex.css';
     import { SvelteToast } from '@zerodevx/svelte-toast';
     const options = {};
 </script>

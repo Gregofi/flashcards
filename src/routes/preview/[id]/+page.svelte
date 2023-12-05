@@ -2,10 +2,11 @@
     import { page } from '$app/stores';
     import { getCard } from '@api/commands';
     import { markdownToHtml } from '@api/markdown';
+    import katex from 'katex';
 
     const id = parseInt($page.params.id);
     const card = getCard(id);
-    setTimeout(window.MathJax.typeset, 0);
+    setTimeout(katex.renderMathInElement(document.body), 0);
 </script>
 
 {#await card}

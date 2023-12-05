@@ -3,7 +3,7 @@
     import { markdownToHtml } from '@api/markdown';
     import type { Card } from '@api/types/card';
     import { getConfig } from '@api/preferences';
-    import '@api/mathjax';
+    import katex from 'katex';
 
     const cfg = getConfig();
 
@@ -11,8 +11,13 @@
     $: cards = null;
     $: flipped = false;
     getCardsToReview(cfg.randomShuffle ?? false).then((cards_) => {
-        cards = cards_.toReversed();
-        setTimeout(window.MathJax.typeset, 0);
+        // TODO Not the way to do this. KaTeX expects a whole string to be latex code.
+        cards = cards_.toReversed().map((question) => ({
+            ...question,
+            question: katex.renderToString(question.question),
+            answer: katex.renderToString(question.answer),
+        }));
+        setTimeout(() => {console.log(katex); katex.render(document.body)}, 0);
     });
 
     const updateState = (cards: Card[], score: number) => {
@@ -24,13 +29,13 @@
 
         flipped = false;
 
-        setTimeout(window.MathJax.typeset, 0);
+        setTimeout(katex.renderMathInElement(document.body), 0);
         return cards;
     };
     const flip = () => {
         flipped = !flipped;
         // Run after DOM settles.
-        setTimeout(window.MathJax.typeset, 0);
+        setTimeout(katex.renderMathInElement(document.body), 0);
     };
 
     // TODO: Lift buttons into separate component.
